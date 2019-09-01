@@ -24,10 +24,8 @@ value = ''
 with open('data/organizations.json') as json_file:
     orgs = json.load(json_file)
 
-
 with open('data/tickets.json') as json_file:
     tickets = json.load(json_file)
-
 
 with open('data/users.json') as json_file:
     users = json.load(json_file)

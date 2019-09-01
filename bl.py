@@ -50,9 +50,18 @@ class BL(object):
         if table_idx == Table.ORG:
             os = filter(lambda x: ((term in x) and (isinstance(x[term], unicode)) and (value in unicodedata.normalize('NFKD', x[term]).encode('ascii','ignore'))) \
                                 or ((term in x) and (not isinstance(x[term], unicode)) and (value in str(x[term]))), self.orgs)
+
+            for o in os:
+                o_tickets = filter(lambda x: ('organization_id' in x) and (x['organization_id'] == int(o[term])), self.tickets)
+                subjects = []
+                for ot in o_tickets:
+                    subjects.append(ot['subject'])
+                    
+                o['tikets'] = subjects
+
             return os
 
-        return None
+        return []
 
     def all_searchable_fields(self):
         print("""
