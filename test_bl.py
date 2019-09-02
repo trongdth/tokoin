@@ -47,7 +47,7 @@ class TestBL(unittest.TestCase):
         pass
 
 
-    def test_search_users(self):
+    def test_search_users_with_term_is_integer_field(self):
         actual = self.bl.search(Table.USER, '_id', '1')
         expected = 0
         self.assertEqual(expected, len(actual))
@@ -56,6 +56,13 @@ class TestBL(unittest.TestCase):
         expected = 1
         self.assertEqual(expected, len(actual))
 
+
+    def test_search_users_with_term_is_string_field(self):
+        pass
+
+
+    def test_search_users_with_term_is_array_field(self):
+        pass
 
 if __name__ == '__main__':
     unittest.main()
