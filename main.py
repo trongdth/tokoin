@@ -68,8 +68,13 @@ def __build_search(state):
         value = text
         response = bl.search(table_idx, term, value)
 
-        for r in response:
-            bl.print_readable_data(r)
+        if len(response) == 0:
+            print('No results found')
+        else:
+            result = {}
+            result['number_of_result'] = len(response)
+            result['search_result'] = response
+            print(json.dumps(result, indent=4))
 
 
 def __build():
@@ -95,7 +100,7 @@ def main():
         __build()
 
     except (KeyboardInterrupt, Exception) as e:
-        logger.warn("Stopping tokoin: %s", e)
+        logger.warn("Stopping tokoin: %s", str(e))
 
 
 if __name__ == '__main__':

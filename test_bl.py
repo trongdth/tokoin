@@ -17,7 +17,13 @@ class TestBL(unittest.TestCase):
             """
             [
                 {
-                    "_id": 1
+                    "_id": 1,
+                    "name": "ABC123",
+                    "tags" : [
+                        "a",
+                        "b",
+                        "c"
+                    ]
                 }
             ]
             """
@@ -26,7 +32,13 @@ class TestBL(unittest.TestCase):
             """
             [
                 {
-                    "_id": 2
+                    "_id": 2,
+                    "name": "CDR",
+                    "tags": [
+                        "c",
+                        "d",
+                        "r"
+                    ]
                 }
             ]
             """
@@ -35,7 +47,13 @@ class TestBL(unittest.TestCase):
             """
             [
                 {
-                    "_id": 3
+                    "_id": 3,
+                    "name": "TEQ",
+                    "tags": [
+                        "t",
+                        "e",
+                        "q"
+                    ]
                 }
             ]
             """
@@ -58,11 +76,23 @@ class TestBL(unittest.TestCase):
 
 
     def test_search_users_with_term_is_string_field(self):
-        pass
+        actual = self.bl.search(Table.TICKET, 'name', '1')
+        expected = 0
+        self.assertEqual(expected, len(actual))
+
+        actual = self.bl.search(Table.TICKET, 'name', 'C')
+        expected = 1
+        self.assertEqual(expected, len(actual))
 
 
     def test_search_users_with_term_is_array_field(self):
-        pass
+        actual = self.bl.search(Table.ORG, 'tags', '1')
+        expected = 0
+        self.assertEqual(expected, len(actual))
+
+        actual = self.bl.search(Table.ORG, 'tags', 'a')
+        expected = 1
+        self.assertEqual(expected, len(actual))
 
 if __name__ == '__main__':
     unittest.main()

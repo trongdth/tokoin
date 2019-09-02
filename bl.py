@@ -28,58 +28,78 @@ class BL(object):
         self.users = users
 
 
-    def print_readable_data(self, data):
-        print("""
-        ----------------------------------
-        """)
-        for k, v in data.iteritems():
-            print('{}: {}'.format(k, v))
-
-
     def search(self, table_idx, term, value):
         if table_idx == Table.USER:
-            us = filter(lambda x: ((term in x) and (isinstance(x[term], unicode)) and (value == unicodedata.normalize('NFKD', x[term]).encode('ascii','ignore'))) \
-                                or ((term in x) and (not isinstance(x[term], unicode)) and (value == str(x[term]))), self.users)
+            us = filter(lambda x: ((term in x) and (isinstance(x[term], unicode)) and (value in unicodedata.normalize('NFKD', x[term]).encode('ascii','ignore'))) \
+                                or ((term in x) and (not isinstance(x[term], unicode)) and (value in str(x[term]))), self.users)
 
             
             for u in us:
                 # get assignee tickets 
-                a_tickets = filter(lambda x: ('assignee_id' in x) and (x['assignee_id'] == int(u['_id'])), self.tickets)
+                a_tickets = filter(lambda x: ('assignee_id' in x and '_id' in u) and (int(x['assignee_id']) == int(u['_id'])), self.tickets)
 
                 subjects = []
                 for at in a_tickets:
                     subjects.append(at['subject'])
+                
                 u['assigned_tickets'] = subjects
 
                 # get submitted tickets
-                s_tickets = filter(lambda x: ('submitter_id' in x) and (x['submitter_id'] == int(u['_id'])), self.tickets)
+                s_tickets = filter(lambda x: ('submitter_id' in x and '_id' in u) and (int(x['submitter_id']) == int(u['_id'])), self.tickets)
+
                 subjects = []
                 for st in s_tickets:
                     subjects.append(st['subject'])
+                
                 u['submitted_tickets'] = subjects
 
                 # get org name
-                os = filter(lambda x: ('_id' in x) and (x['_id'] == int(u['organization_id'])), self.orgs)
-                org_names = []
-                for o in os:
-                    if o['name'] not in org_names:
-                        org_names.append(o['name'])
-                u['organization_name'] = org_names
+                org = filter(lambda x: ('_id' in x and 'organization_id' in u) and (int(x['_id']) == int(u['organization_id'])), self.orgs)
+
+                org_name = ''
+                for o in org:
+                    org_name = o['name']
+                    break
+                
+                u['organization_name'] = org_name
 
             return us
 
         if table_idx == Table.TICKET:
             ts = filter(lambda x: ((term in x) and (isinstance(x[term], unicode)) and (value in unicodedata.normalize('NFKD', x[term]).encode('ascii','ignore'))) \
                                 or ((term in x) and (not isinstance(x[term], unicode)) and (value in str(x[term]))), self.tickets)
+
+            for t in ts:
+                # get assignee name 
+                usrs = filter(lambda x: ('_id' in x and 'assignee_id' in t) and (int(x['_id']) == int(t['assignee_id'])), self.users)
+
+                for u in usrs:
+                    t['assignee_name'] = u['name'] if not isinstance(u['name'], unicode) else unicodedata.normalize('NFKD', u['name']).encode('ascii','ignore')
+                    break
+
+                # get submitter name
+                usrs = filter(lambda x: ('_id' in x and 'submitter_id' in t) and (int(x['_id']) == int(t['submitter_id'])), self.users)
+
+                for u in usrs:
+                    t['submitter_name'] = u['name'] if not isinstance(u['name'], unicode) else unicodedata.normalize('NFKD', u['name']).encode('ascii','ignore')
+                    break
+
+                # get org name
+                os = filter(lambda x: ('_id' in x and 'organization_id' in t) and (int(x['_id']) == int(t['organization_id'])), self.orgs)
+
+                for o in os:
+                    t['organization_name'] = o['name'] if not isinstance(o['name'], unicode) else unicodedata.normalize('NFKD', o['name']).encode('ascii','ignore')
+                    break
+
             return ts
 
         if table_idx == Table.ORG:
-            os = filter(lambda x: ((term in x) and (isinstance(x[term], unicode)) and (value == unicodedata.normalize('NFKD', x[term]).encode('ascii','ignore'))) \
-                                or ((term in x) and (not isinstance(x[term], unicode)) and (value == str(x[term]))), self.orgs)
+            os = filter(lambda x: ((term in x) and (isinstance(x[term], unicode)) and (value in unicodedata.normalize('NFKD', x[term]).encode('ascii','ignore'))) \
+                                or ((term in x) and (not isinstance(x[term], unicode)) and (value in str(x[term]))), self.orgs)
 
             for o in os:
                 # get all tickets
-                o_tickets = filter(lambda x: ('organization_id' in x) and (x['organization_id'] == int(o['_id'])), self.tickets)
+                o_tickets = filter(lambda x: ('organization_id' in x and '_id' in o) and (int(x['organization_id']) == int(o['_id'])), self.tickets)
 
                 subjects = []
                 for ot in o_tickets:
@@ -89,7 +109,7 @@ class BL(object):
                 o['tikets'] = subjects
 
                 # get all users
-                usrs = filter(lambda x: ('organization_id' in x) and (x['organization_id'] == int(o['_id'])), self.users)
+                usrs = filter(lambda x: ('organization_id' in x and '_id' in o) and (int(x['organization_id']) == int(o['_id'])), self.users)
 
                 user_names = []
                 for u in usrs:
